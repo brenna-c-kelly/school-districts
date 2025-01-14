@@ -75,7 +75,7 @@ cb_shp_20 <- st_read("../data/cb_shp/cb_shp_20.shp")
 # - use cb_shp_20 for years 2020-2021
 # school district boundaries may change any year, so you'll create the crosswalk for each year of data
 
-# there is a many-to-many
+# there is a many-to-one issue
 
 # e.g., to merge 2021 school districts with cb_shp_20:
 sb_cb <- st_join(cb_shp_20, sb_21,    
@@ -83,12 +83,15 @@ sb_cb <- st_join(cb_shp_20, sb_21,
                  largest = FALSE)
 # check that the census blocks are unique (not assigned to more than one school district)
 
+# the more computationally expensive process, only to be applied to blocks with many-to-one
 not_unique <- sb_cb |>
   filter(duplicated(GEOID.y))
 
-sb_cb <- st_join(not_unique, sb_21,    
+sb_cb_2 <- st_join(not_unique, sb_21,    
                  join = st_intersects, 
                  largest = TRUE)
+
+# then combine
 
 # if you find that census blocks are not unique in the crosswalk, use:
 # largest = TRUE; ensures each block is only assigned to one school district 
