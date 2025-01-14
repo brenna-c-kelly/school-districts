@@ -85,7 +85,7 @@ sb_cb <- st_join(cb_shp_20, sb_21,
 
 # the more computationally expensive process, only to be applied to blocks with many-to-one
 not_unique <- sb_cb |>
-  filter(duplicated(GEOID.y))
+  filter(duplicated(GEOID.x))
 
 sb_cb_2 <- st_join(not_unique, sb_21,    
                  join = st_intersects, 
