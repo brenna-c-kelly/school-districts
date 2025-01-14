@@ -14,10 +14,13 @@ library(tidycensus)
 #     notes:
 #   - these are national files and fairly large (~50 MB)
 #   - these only go down to the census block *group* level, not census block
-crosswalk_13 <- read_sas("data/GRF13/grf13_lea_blkgrp.sas7bdat")
+crosswalk_13 <- read_sas("../GRF13/grf13_lea_blkgrp.sas7bdat")
+# ^you won't be able to read this in — I've reduced it down to only UT so it's an email-able size
 
 crosswalk_13 <- crosswalk_13 |>
   filter(LEAID %in% sb_21$LEAID)
+
+write.csv(crosswalk_13, "../data/GRF13_UT/crosswalk_13.csv", row.names = FALSE)
 
 
 # OPTION 2: create the crosswalk spatially
@@ -29,7 +32,7 @@ crosswalk_13 <- crosswalk_13 |>
 #   - school districts may vary by grade; Utah only makes is unified school district data available to the census
 #   - I'm also attaching a folder with all these shapefiles
 
-sb_21 <- st_read("data/tl_unified school districts/tl_2021_49_unsd/tl_2021_49_unsd.shp")
+sb_21 <- st_read("../data/tl_unified school districts/tl_2021_49_unsd/tl_2021_49_unsd.shp")
 
 sb_21$LEAID <- paste0(sb_21$STATEFP, sb_21$UNSDLEA)
 
@@ -61,16 +64,18 @@ cb_shp_20 <- get_decennial(geography = "block",
                         year = 2020, output = "wide")
 
 # if you don't want to register with the API, just read in the data I've written here:
-st_write(cb_shp_10, "data/cb_shp/cb_shp_10.shp", append = FALSE)
-st_write(cb_shp_20, "data/cb_shp/cb_shp_20.shp", append = FALSE)
+st_write(cb_shp_10, "../data/cb_shp/cb_shp_10.shp", append = FALSE)
+st_write(cb_shp_20, "../data/cb_shp/cb_shp_20.shp", append = FALSE)
 
-cb_shp_10 <- st_read("data/cb_shp/cb_shp_10.shp")
-cb_shp_20 <- st_read("data/cb_shp/cb_shp_20.shp")
+cb_shp_10 <- st_read("../data/cb_shp/cb_shp_10.shp")
+cb_shp_20 <- st_read("../data/cb_shp/cb_shp_20.shp")
 
 # the spatial join: spatially linking the school district and census data
 # - use cb_shp_10 for years 2013-2019
 # - use cb_shp_20 for years 2020-2021
 # school district boundaries may change any year, so you'll create the crosswalk for each year of data
+
+# there is a many-to-many
 
 # e.g., to merge 2021 school districts with cb_shp_20:
 sb_cb <- st_join(cb_shp_20, sb_21,    
