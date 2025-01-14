@@ -32,12 +32,7 @@ districts_diff <- st_difference(districts_21, districts_13)
 tm_shape(districts_21) +
   tm_polygons(col = "white", border.col = "red") +
   tm_shape(districts_13) +
-  tm_polygons(col = "white", border.col = "darkblue") +
-  tm_shape(districts_diff) +
-  tm_polygons(col = "purple", alpha = 0.5)
-
-tm_shape(districts_diff) +
-  tm_polygons(col = "purple", alpha = 0.5)
+  tm_polygons(col = "white", border.col = "darkblue")
 
 store_crosswalk <- list()
 
