@@ -78,24 +78,42 @@ cb_shp_20 <- st_read("../data/cb_shp/cb_shp_20.shp")
 # there is a many-to-one issue
 
 # e.g., to merge 2021 school districts with cb_shp_20:
-sb_cb <- st_join(cb_shp_20, sb_21,    
+sb_cb_1 <- st_join(cb_shp_20, sb_21,    
                  join = st_intersects, 
                  largest = FALSE)
+# takes ~30s to run with largest = FALSE argument
 # check that the census blocks are unique (not assigned to more than one school district)
 
 # the more computationally expensive process, only to be applied to blocks with many-to-one
-not_unique <- sb_cb |>
+not_unique <- sb_cb_1 |>
   filter(duplicated(GEOID.x))
 
-sb_cb_2 <- st_join(not_unique, sb_21,    
+cb_shp_20_not_unique <- cb_shp_20 |>
+  filter(GEOID %in% not_unique$GEOID.x)
+
+sb_cb_2 <- st_join(cb_shp_20_not_unique, sb_21,    
                  join = st_intersects, 
                  largest = TRUE)
+# takes ~3m to run with subset and largest = TRUE argument
+test <- sb_cb_2 |>
+  select(GEOID.x, NAME.y, LOGRADE, HIGRADE, LEAID)
+
+
+# combine the two
+sb_cb <- sb_cb_1 |>
+  filter(!dupliated(GEOID.x)) |>
+  select(GEOID.x, NAME.y, LOGRADE, HIGRADE, LEAID) |>
+  rename(census_block_fips = GEOID.x,
+         school_district = NAME.y) |>
+  rbind()
+head(sb_cb_1)
+
+head(sb_cb_2)
 
 # then combine
 
 # if you find that census blocks are not unique in the crosswalk, use:
 # largest = TRUE; ensures each block is only assigned to one school district 
-# takes ~30s to run with largest = FALSE argument
 # takes 15-20m to run with largest = TRUE argument
 #   - note: there will not be 100% match, but you can check that these census block groups are unpopulated:
 
